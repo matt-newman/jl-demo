@@ -1,7 +1,7 @@
 const thing = () => {
-    return "a thing";
-}
+	return 'a thing';
+};
 
 export {
-    thing
-}
+	thing
+};
