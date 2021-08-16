@@ -1,0 +1,122 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/project
+  docker:
+    - image: circleci/node:14.15
+
+orbs:
+  cypress: cypress-io/cypress@1.16.1
+  heroku: circleci/heroku@1.2
+
+jobs:
+
+  install_deps:
+    <<: *defaults 
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - npm-install-{{ checksum "package-lock.json" }}
+      - run:
+          name: Dependencies Install
+          command: npm ci
+      - save_cache:
+          key: npm-install-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+            - ~/.cache
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - node_modules/*
+  
+  lint_check:
+    <<: *defaults 
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Linting Check
+          command: npm run lint
+
+  test_unit:
+    <<: *defaults 
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Unit Testing
+          command: npm run test:coverage
+      - store_test_results:
+          path: reports
+
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build
+          command: npm run build
+      - store_artifacts:
+          path: dist
+
+only_release: &only_release
+  filters:
+    branches:
+      only: /trigger-release-.*/
+
+only_master: &only_master
+  filters:
+    branches:
+      only: master
+
+ignore_release: &ignore_release
+  filters:
+    branches:
+      ignore: /trigger-release-.*/
+
+require_dep: &require_dep
+  requires:
+    - install_deps
+
+require_checks: &require_checks
+  requires:
+    - lint_check
+    - test_unit
+    - cypress/run
+
+workflows:
+  version: 2.1
+  build:
+    jobs:
+      - install_deps:
+          <<: *ignore_release
+      - lint_check:
+          <<: *ignore_release
+          <<: *require_dep 
+      - test_unit:
+          <<: *ignore_release
+          <<: *require_dep
+      - cypress/run:
+          <<: *ignore_release
+          <<: *require_dep
+          build: npm run build
+          start: npm run serve
+          wait-on: 'http://localhost:8080'
+      - build:
+          <<: *only_master
+          <<: *ignore_release
+          <<: *require_checks
+      - heroku/deploy-via-git:
+          force: true # this parameter instructs the push to use a force flag when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+          requires:
+            - test_unit # only run deploy-via-git job if the build job has completed
+            - cypress/run
+          filters:
+            branches:
+              only: master
