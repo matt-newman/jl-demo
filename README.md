@@ -1,4 +1,6 @@
-# First Thoughts:
+# JL Demo:
+
+## First thoughts:
 
 For code example purposes I'll minimize framework usage for the actual site, but will obviously use established tooling for build purposes.
 
@@ -18,7 +20,7 @@ Also with regards to TDD, I'm happy with that approach, although for practical r
 
 I'll likely add both pages (results and product) as it should also allow for a very shallow e2e journey example test.
 
-# Before starting:
+## Before starting:
 
 Due to the nature of the brief and the output, in the real world there would be a number of considerations around how to build a results page. Change frequency, server load and caching being the common intersecting challenges. 
 
