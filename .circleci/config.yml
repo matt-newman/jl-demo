@@ -107,7 +107,7 @@ workflows:
           <<: *require_dep
           build: npm run build
           start: npm run serve
-          wait-on: 'http://localhost:5000'
+          wait-on: 'http://localhost:8080'
       - build:
           <<: *only_master
           <<: *ignore_release
