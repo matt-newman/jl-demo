@@ -1,6 +1,9 @@
 {
     "bail": 1,
     "verbose": true,
+    "testMatch": [
+        "**/spec/**/*.spec.[jt]s?(x)"
+    ],
     "transform": {
         "^.+\\.jsx?$": "babel-jest"
     }
