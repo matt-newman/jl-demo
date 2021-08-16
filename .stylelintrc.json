@@ -1,0 +1,3 @@
+{
+    "extends": "@telegraph-engineering/stylelint-config-telegraph"
+}

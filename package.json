@@ -4,8 +4,22 @@
   "description": "demo for JL using provided examples and API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "npm run lint:js & npm run lint:css",
+    "lint:css": "stylelint src/css",
+    "lint:js": "eslint src/js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "jest -c jest.config.json --passWithNoTests --detectOpenHandles --forceExit",
+    "test:watch": "jest -c jest.config.json --watch --silent false",
+    "test:coverage": "npm run test:unit -- --ci --coverage --runInBand",
+    "test:integration": "cypress open",
+    "test:integration:headless": "cypress run --headless"
   },
   "author": "Matt Newman",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@telegraph-engineering/eslint-config-telegraph": "^1.6.1",
+    "@telegraph-engineering/stylelint-config-telegraph": "^1.2.1",
+    "eslint": "^7.32.0",
+    "stylelint": "^13.13.1"
+  }
 }

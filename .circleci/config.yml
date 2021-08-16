@@ -1,38 +1,114 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+defaults: &defaults
+  working_directory: ~/project
+  docker:
+    - image: circleci/node:10.16
+
 orbs:
-  node: circleci/node@4.1
-  # The heroku orb contains a set of prepackaged CircleCI configuration you can utilize to deploy applications to heroku
-  # Orbs reduce the amount of configuration required for common tasks.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/heroku
-  # NOTE: Environment variables containing the necessary secrets can be setup in the CircleCI UI
-  # See here https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project
+  cypress: cypress-io/cypress@1.16.1
   heroku: circleci/heroku@1.2
 
 jobs:
-  build: 
+
+  install_deps:
+    <<: *defaults 
     steps:
       - checkout
-      - run: npm run build
-  test: 
+      - restore_cache:
+          keys:
+            - npm-install-{{ checksum "package-lock.json" }}
+      - run:
+          name: Dependencies Install
+          command: npm ci
+      - save_cache:
+          key: npm-install-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+            - ~/.cache
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - node_modules/*
+  
+  lint_check:
+    <<: *defaults 
     steps:
       - checkout
-      - run: npm test
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Linting Check
+          command: npm run lint
+
+  test_unit:
+    <<: *defaults 
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Unit Testing
+          command: npm run test:unit:coverage
+      - store_test_results:
+          path: reports
+
+  build_all:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build
+          command: npm run build
+      - store_artifacts:
+          path: dist
+
+only_release: &only_release
+  filters:
+    branches:
+      only: /trigger-release-.*/
+
+only_master: &only_master
+  filters:
+    branches:
+      only: master
+
+ignore_release: &ignore_release
+  filters:
+    branches:
+      ignore: /trigger-release-.*/
+
+require_dep: &require_dep
+  requires:
+    - install_deps
+
+require_checks: &require_checks
+  requires:
+    - lint_check
+    - test_unit
+    - cypress/run
 
 workflows:
-  # Below is the definition of your workflow.
-  # Inside the workflow, you provide the jobs you want to run, e.g this workflow runs the build-and-test job above.
-  # CircleCI will run this workflow on every commit.
-  # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
-  sample:
+  version: 2.1
+  build:
     jobs:
-      - test
-      - heroku/deploy-via-git:
-          force: true # this parameter instructs the push to use a force flag when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
-          requires:
-            - test # only run deploy-via-git job if the build job has completed
-          filters:
-            branches:
-              only: master
+      - install_deps:
+          <<: *ignore_release
+      - lint_check:
+          <<: *ignore_release
+          <<: *require_dep 
+      - test_unit:
+          <<: *ignore_release
+          <<: *require_dep
+      - cypress/run:
+          <<: *ignore_release
+          <<: *require_dep
+          build: npm run test:integration:build
+          start: npm run test:integration:serve
+          wait-on: 'http://localhost:5000'
+      - build_all:
+          <<: *only_master
+          <<: *ignore_release
+          <<: *require_checks
