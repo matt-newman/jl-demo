@@ -6,6 +6,7 @@ defaults: &defaults
     - image: circleci/node:14.15
 
 orbs:
+  cypress: cypress-io/cypress@1.16.1
   heroku: circleci/heroku@1.2
 
 jobs:
