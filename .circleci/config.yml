@@ -50,7 +50,7 @@ jobs:
       - store_test_results:
           path: reports
 
-  build_all:
+  build:
     <<: *defaults
     steps:
       - checkout
@@ -102,8 +102,8 @@ workflows:
       - cypress/run:
           <<: *ignore_release
           <<: *require_dep
-          build: npm run test:integration:build
-          start: npm run test:integration:serve
+          build: npm run build
+          start: npm run serve
           wait-on: 'http://localhost:5000'
       - build_all:
           <<: *only_master

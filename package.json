@@ -4,9 +4,11 @@
   "description": "demo for JL using provided examples and API",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'build step'",
     "lint": "npm run lint:js & npm run lint:css",
     "lint:css": "stylelint src/css",
     "lint:js": "eslint src/js",
+    "serve": "http-server",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:unit": "jest -c jest.config.json --passWithNoTests --detectOpenHandles --forceExit",
     "test:watch": "jest -c jest.config.json --watch --silent false",
@@ -25,6 +27,12 @@
     "babel-jest": "^27.0.6",
     "cypress": "^8.2.0",
     "eslint": "^7.32.0",
+    "husky": "^7.0.1",
     "stylelint": "^13.13.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm run test:unit"
+    }
   }
 }
