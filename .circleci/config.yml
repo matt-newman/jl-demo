@@ -49,7 +49,7 @@ jobs:
           at: ~/project
       - run:
           name: Unit Testing
-          command: npm run test:unit:coverage
+          command: npm run test:coverage
       - store_test_results:
           path: reports
 
@@ -112,3 +112,11 @@ workflows:
           <<: *only_master
           <<: *ignore_release
           <<: *require_checks
+      - heroku/deploy-via-git:
+                force: true # this parameter instructs the push to use a force flag when pushing to the heroku remote, see: https://devcenter.heroku.com/articles/git
+                requires:
+                  - test_unit # only run deploy-via-git job if the build job has completed
+                  - cypress/run
+                filters:
+                  branches:
+                    only: master
