@@ -2,11 +2,8 @@ version: 2.1
 
 defaults: &defaults
   working_directory: ~/project
-  docker:
-    - image: circleci/node:10.16
 
 orbs:
-  cypress: cypress-io/cypress@1.16.1
   heroku: circleci/heroku@1.2
 
 jobs:
