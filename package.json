@@ -17,9 +17,19 @@
   "author": "Matt Newman",
   "license": "ISC",
   "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
     "@telegraph-engineering/eslint-config-telegraph": "^1.6.1",
     "@telegraph-engineering/stylelint-config-telegraph": "^1.2.1",
+    "babel-jest": "^27.0.6",
     "eslint": "^7.32.0",
     "stylelint": "^13.13.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
   }
 }
