@@ -4,6 +4,8 @@
   "description": "demo for JL using provided examples and API",
   "main": "index.js",
   "scripts": {
+    "build": "",
+    "dev": "http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matt Newman",
