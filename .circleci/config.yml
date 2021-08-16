@@ -2,6 +2,8 @@ version: 2.1
 
 defaults: &defaults
   working_directory: ~/project
+  docker:
+    - image: circleci/node:14.15
 
 orbs:
   heroku: circleci/heroku@1.2
